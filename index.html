@@ -513,6 +513,13 @@
     width: 100%;
     height: 100%;
     border: none;
+    position: relative;
+    z-index: 1;
+    background: #f0f0f0;
+  }
+  .map-wrapper #map-container .amap-container {
+    width: 100% !important;
+    height: 100% !important;
   }
 
   /* Animated marker overlay */
@@ -522,7 +529,7 @@
     width: 100%; height: 100%;
     pointer-events: none;
     z-index: 10;
-    display: flex;
+    display: none; /* 地图加载成功后才显示 */
     align-items: center;
     justify-content: center;
   }
@@ -1327,38 +1334,90 @@
 </script>
 
 <!-- ═══ 高德地图 JS API 2.0 ═══ -->
+<script>
+  /* --- 安全密钥（必须在 loader.js 之前声明）--- */
+  window._AMapSecurityConfig = {
+    securityJsCode: '0ff6266df278ea9e7eed7839f4348dea'
+  };
+</script>
 <script src="https://webapi.amap.com/loader.js"></script>
 <script>
-  function amapError(msg) {
-    document.getElementById('map-container').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#fff5f0;color:#c0392b;font-size:13px;flex-direction:column;gap:6px;"><span>❌ 地图加载失败</span><span style="font-size:11px;color:#999;">' + msg + '</span></div>';
-  }
+  (function() {
+    var container = document.getElementById('map-container');
+    var overlay  = document.querySelector('.map-marker-layer');
 
-  AMapLoader.load({
-    key: '4755cf49456a506008ea3946347b49ff9',
-    version: '2.0',
-    plugins: ['AMap.Scale'],
-    securityJsCode: '0ff6266df278ea9e7eed7839f4348dea'
-  }).then((AMap) => {
-    const map = new AMap.Map('map-container', {
-      zoom: 16,
-      center: [116.1043, 38.7115],
-      viewMode: '2D'
+    function showError(msg, detail) {
+      var html = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#fff5f0;color:#c0392b;font-size:14px;flex-direction:column;gap:8px;padding:20px;text-align:center;">';
+      html += '<span style="font-size:32px;">&#9888;</span>';
+      html += '<span style="font-weight:600;">地图加载失败</span>';
+      html += '<span style="font-size:12px;color:#999;max-width:400px;">' + msg + '</span>';
+      if (detail) html += '<span style="font-size:11px;color:#c0392b;background:#fef0f0;padding:4px 10px;border-radius:4px;">' + detail + '</span>';
+      html += '<span style="font-size:11px;color:#999;">密钥Key: 4755cf49…ff9</span>';
+      html += '<span style="font-size:11px;color:#999;">域名白名单: *.shizhige.win</span>';
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    // 检测 loader.js 是否成功加载
+    if (typeof AMapLoader === 'undefined') {
+      showError('高德地图 JS 加载器(loader.js)未能加载，可能是网络问题或 CDN 被拦截。', 'AMapLoader is undefined');
+      return;
+    }
+
+    console.log('[咕噜地图] AMapLoader 就绪，开始加载…');
+
+    // 超时保护
+    var timeoutId = setTimeout(function() {
+      showError('地图加载超时（15秒），请检查网络连接或刷新重试。', 'Timeout');
+    }, 15000);
+
+    AMapLoader.load({
+      key: '4755cf49456a50608ea3946347b49ff9',
+      version: '2.0'
+    }).then(function(AMap) {
+      clearTimeout(timeoutId);
+      console.log('[咕噜地图] JS API 加载成功，容器尺寸:', container.offsetWidth + 'x' + container.offsetHeight);
+
+      // 创建地图
+      var map = new AMap.Map('map-container', {
+        zoom: 16,
+        center: [116.1043, 38.7115]
+      });
+
+      console.log('[咕噜地图] 地图实例已创建');
+
+      // 添加标记点
+      var marker = new AMap.Marker({
+        position: [116.1043, 38.7115],
+        title: '咕噜咖喱饭(任丘店)'
+      });
+      map.add(marker);
+      console.log('[咕噜地图] Marker 已添加');
+
+      // 信息窗体
+      var infoWindow = new AMap.InfoWindow({
+        content: '<div style="padding:10px 14px;font-size:14px;font-weight:600;color:#3C1F0E;">🍛 咕噜咖喱饭(任丘店)</div><div style="padding:0 14px 10px;font-size:12px;color:#666;">河北省任丘市油建二公司对面</div>',
+        offset: new AMap.Pixel(0, -30)
+      });
+      marker.on('click', function() {
+        infoWindow.open(map, marker.getPosition());
+      });
+
+      // 地图加载成功后，显示 CSS 动画覆盖层
+      if (overlay) {
+        overlay.style.display = 'flex';
+      }
+      console.log('[咕噜地图] ✅ 全部就绪');
+
+    }).catch(function(e) {
+      clearTimeout(timeoutId);
+      console.error('[咕噜地图] 加载失败:', e);
+      var detail = '';
+      try { detail = JSON.stringify(e); } catch(ignore) { detail = String(e); }
+      showError('JS API 鉴权失败或网络异常 — 请确认：<br>① 高德Key类型为「Web端(JS API)」<br>② 域名白名单包含 *.shizhige.win<br>③ 安全密钥已启用且匹配', detail);
     });
-    const marker = new AMap.Marker({
-      position: [116.1043, 38.7115],
-      title: '咕噜咖喱饭(任丘店)',
-      offset: new AMap.Pixel(-13, -34)
-    });
-    map.add(marker);
-    map.add(new AMap.Scale());
-    const infoWindow = new AMap.InfoWindow({
-      content: '<div style="padding:8px 12px;font-size:14px;font-weight:600;color:#3C1F0E;">🍛 咕噜咖喱饭(任丘店)</div><div style="padding:0 12px 8px;font-size:12px;color:#666;">河北省任丘市油建二公司对面</div>',
-      offset: new AMap.Pixel(0, -30)
-    });
-    marker.on('click', () => infoWindow.open(map, marker.getPosition()));
-  }).catch(e => {
-    amapError(e.message || '未知错误');
-  });
+
+  })();
 </script>
 
 </body>
