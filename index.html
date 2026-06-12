@@ -509,7 +509,7 @@
     50% { box-shadow: 0 12px 45px rgba(255,107,53,0.25); }
   }
 
-  .map-wrapper iframe {
+  .map-wrapper #map-container {
     width: 100%;
     height: 100%;
     border: none;
@@ -959,7 +959,7 @@
     <p>河北省任丘市油建二公司对面 · 交通便利 · 停车方便</p>
   </div>
   <div class="map-wrapper">
-    <iframe src="https://uri.amap.com/marker?position=116.1043,38.7115&name=咕噜咖喱饭(任丘店)&callnative=1&zoom=16" allow="geolocation" title="门店地图"></iframe>
+    <div id="map-container" style="width:100%;height:100%;"></div>
     <div class="map-marker-layer">
       <div class="map-pin-group">
         <div class="map-pin-label">📍 我们在这里</div>
@@ -1159,14 +1159,36 @@
     }
   });
 
-  function handleLogin(e) {
+  /* ═══ API 基础配置 ═══ */
+  const API_BASE = '/gulu/api';
+
+  async function handleLogin(e) {
     e.preventDefault();
-    const account = document.getElementById('login-account').value;
-    alert('登录成功！欢迎回来，' + account + '  🎉\n（后端接口对接后将实现真实登录）');
-    closeModal('login');
+    const account = document.getElementById('login-account').value.trim();
+    const password = document.getElementById('login-password').value;
+
+    try {
+      const res = await fetch(`${API_BASE}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ account, password })
+      });
+      const json = await res.json();
+      if (json.code === 0) {
+        localStorage.setItem('gulu_token', json.data.token);
+        localStorage.setItem('gulu_user', JSON.stringify(json.data.user));
+        closeModal('login');
+        updateNavAfterLogin(json.data.user);
+        alert('登录成功！欢迎回来，' + json.data.user.nickname + ' 🎉');
+      } else {
+        alert(json.msg || '登录失败');
+      }
+    } catch (e) {
+      alert('网络错误，请稍后重试');
+    }
   }
 
-  function handleRegister(e) {
+  async function handleRegister(e) {
     e.preventDefault();
     const pw = document.getElementById('reg-password').value;
     const pw2 = document.getElementById('reg-password2').value;
@@ -1174,10 +1196,50 @@
       alert('两次密码输入不一致，请重新输入。');
       return;
     }
-    const nickname = document.getElementById('reg-nickname').value;
-    alert('注册成功！欢迎加入咕噜咖喱，' + nickname + '  🍛\n（后端接口对接后将实现真实注册）');
-    closeModal('register');
+    const nickname = document.getElementById('reg-nickname').value.trim();
+    const phone = document.getElementById('reg-phone').value.trim();
+    const password = document.getElementById('reg-password').value;
+
+    try {
+      const res = await fetch(`${API_BASE}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nickname, phone, password })
+      });
+      const json = await res.json();
+      if (json.code === 0) {
+        localStorage.setItem('gulu_token', json.data.token);
+        localStorage.setItem('gulu_user', JSON.stringify(json.data.user));
+        closeModal('register');
+        updateNavAfterLogin(json.data.user);
+        alert('注册成功！欢迎加入咕噜咖喱，' + json.data.user.nickname + ' 🍛');
+      } else {
+        alert(json.msg || '注册失败');
+      }
+    } catch (e) {
+      alert('网络错误，请稍后重试');
+    }
   }
+
+  function updateNavAfterLogin(user) {
+    const nav = document.querySelector('.nav-actions');
+    nav.innerHTML = `
+      <a href="/gulu/profile.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:#3C1F0E;font-weight:500;">
+        <span style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#e67e22,#d35400);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;">${(user.nickname||'U')[0]}</span>
+        ${user.nickname}
+      </a>
+      <a href="/gulu/profile.html" class="nav-btn register-btn" style="text-decoration:none;line-height:1.4;">个人中心</a>
+    `;
+  }
+
+  // 页面加载时检查登录状态
+  (function() {
+    const token = localStorage.getItem('gulu_token');
+    const user = localStorage.getItem('gulu_user');
+    if (token && user) {
+      try { updateNavAfterLogin(JSON.parse(user)); } catch(e) {}
+    }
+  })();
 
   /* ═══ Environment Carousel ═══ */
   const envCarousels = {
@@ -1262,6 +1324,41 @@
 
   updateFoodDots();
   setInterval(() => moveFood(1), 5000);
+</script>
+
+<!-- ═══ 高德地图 JS API 2.0 ═══ -->
+<script src="https://webapi.amap.com/loader.js"></script>
+<script>
+  function amapError(msg) {
+    document.getElementById('map-container').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#fff5f0;color:#c0392b;font-size:13px;flex-direction:column;gap:6px;"><span>❌ 地图加载失败</span><span style="font-size:11px;color:#999;">' + msg + '</span></div>';
+  }
+
+  AMapLoader.load({
+    key: '4755cf49456a506008ea3946347b49ff9',
+    version: '2.0',
+    plugins: ['AMap.Scale'],
+    securityJsCode: '0ff6266df278ea9e7eed7839f4348dea'
+  }).then((AMap) => {
+    const map = new AMap.Map('map-container', {
+      zoom: 16,
+      center: [116.1043, 38.7115],
+      viewMode: '2D'
+    });
+    const marker = new AMap.Marker({
+      position: [116.1043, 38.7115],
+      title: '咕噜咖喱饭(任丘店)',
+      offset: new AMap.Pixel(-13, -34)
+    });
+    map.add(marker);
+    map.add(new AMap.Scale());
+    const infoWindow = new AMap.InfoWindow({
+      content: '<div style="padding:8px 12px;font-size:14px;font-weight:600;color:#3C1F0E;">🍛 咕噜咖喱饭(任丘店)</div><div style="padding:0 12px 8px;font-size:12px;color:#666;">河北省任丘市油建二公司对面</div>',
+      offset: new AMap.Pixel(0, -30)
+    });
+    marker.on('click', () => infoWindow.open(map, marker.getPosition()));
+  }).catch(e => {
+    amapError(e.message || '未知错误');
+  });
 </script>
 
 </body>
