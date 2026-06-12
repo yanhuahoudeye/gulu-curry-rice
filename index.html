@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>咕噜咖喱饭 - 手作咖喱专门店 | 任丘新店</title>
+<style>
+  :root {
+    --c-primary: #D4532A;
+    --c-primary-light: #F5C4B3;
+    --c-bg: #FDF8F5;
+    --c-card: #FFFFFF;
+    --c-text: #2C2C2A;
+    --c-muted: #6B6B6B;
+    --c-accent: #1D9E75;
+    --radius: 12px;
+    --radius-lg: 20px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+    background: var(--c-bg);
+    color: var(--c-text);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── Top Nav ── */
+  .top-nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 40px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    transition: all 0.3s;
+  }
+
+  .top-nav.scrolled {
+    box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+  }
+
+  .nav-brand {
+    font-size: 20px;
+    font-weight: 700;
+    color: #3C1F0E;
+    letter-spacing: 1px;
+    text-decoration: none;
+  }
+
+  .nav-brand span {
+    color: #e67e22;
+  }
+
+  .nav-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .nav-btn {
+    padding: 8px 20px;
+    border-radius: 22px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s;
+    border: none;
+    font-family: inherit;
+  }
+
+  .nav-btn.login-btn {
+    background: transparent;
+    color: #3C1F0E;
+    border: 1.5px solid #3C1F0E;
+  }
+
+  .nav-btn.login-btn:hover {
+    background: #3C1F0E;
+    color: #fff;
+  }
+
+  .nav-btn.register-btn {
+    background: linear-gradient(135deg, #e67e22, #d35400);
+    color: #fff;
+  }
+
+  .nav-btn.register-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(230,126,34,0.35);
+  }
+
+  /* ── Modal Overlay ── */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  .modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .modal {
+    background: #fff;
+    border-radius: 16px;
+    padding: 40px 36px;
+    width: 400px;
+    max-width: 90vw;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    position: relative;
+    animation: modal-in 0.35s ease-out;
+  }
+
+  @keyframes modal-in {
+    from { transform: translateY(30px) scale(0.95); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 14px; right: 18px;
+    width: 32px; height: 32px;
+    border: none;
+    background: #f5f5f5;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    color: #888;
+    transition: all 0.2s;
+  }
+
+  .modal-close:hover {
+    background: #e74c3c;
+    color: #fff;
+  }
+
+  .modal h3 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #3C1F0E;
+    margin-bottom: 4px;
+  }
+
+  .modal .sub {
+    font-size: 13px;
+    color: #999;
+    margin-bottom: 24px;
+  }
+
+  .form-group {
+    margin-bottom: 18px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 6px;
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 15px;
+    font-family: inherit;
+    transition: border 0.2s;
+    box-sizing: border-box;
+    outline: none;
+  }
+
+  .form-group input:focus {
+    border-color: #e67e22;
+    box-shadow: 0 0 0 3px rgba(230,126,34,0.1);
+  }
+
+  .form-submit {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 6px;
+    font-family: inherit;
+    transition: all 0.25s;
+  }
+
+  .form-submit.login-submit {
+    background: linear-gradient(135deg, #e67e22, #d35400);
+    color: #fff;
+  }
+
+  .form-submit.register-submit {
+    background: linear-gradient(135deg, #c0392b, #a93226);
+    color: #fff;
+  }
+
+  .form-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  }
+
+  .form-switch {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 13px;
+    color: #999;
+  }
+
+  .form-switch a {
+    color: #e67e22;
+    cursor: pointer;
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .form-switch a:hover {
+    text-decoration: underline;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    position: relative;
+    height: 100vh;
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: linear-gradient(135deg, #3C1F0E 0%, #6B3A1F 40%, #D4532A 100%);
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url('images/日式手作咖喱猪排饭_金黄色的现炸猪排覆盖在白色米饭上_淋上深_2026-06-12T07-38-14.png') center/cover;
+    opacity: 0.25;
+    filter: blur(2px);
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    padding: 40px 32px;
+  }
+
+  .hero-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #FAC775;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 20px;
+    border-radius: 100px;
+    margin-bottom: 24px;
+    letter-spacing: 2px;
+  }
+
+  .hero h1 {
+    font-size: 56px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 16px;
+    letter-spacing: 4px;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+  }
+
+  .hero h1 span {
+    display: block;
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: 6px;
+    margin-top: 8px;
+    opacity: 0.85;
+  }
+
+  .hero p {
+    font-size: 16px;
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 32px;
+    line-height: 1.8;
+  }
+
+  .hero-btn {
+    display: inline-block;
+    background: var(--c-primary);
+    color: #fff;
+    padding: 14px 40px;
+    border-radius: 100px;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s;
+    letter-spacing: 1px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .hero-btn:hover {
+    background: #B83D1C;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(212,83,42,0.4);
+  }
+
+  /* ── Sections ── */
+  .section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 80px 32px;
+  }
+
+  .section-title {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .section-title h2 {
+    font-size: 32px;
+    font-weight: 600;
+    color: #3C1F0E;
+    margin-bottom: 12px;
+  }
+
+  .section-title .line {
+    width: 60px;
+    height: 3px;
+    background: var(--c-primary);
+    margin: 0 auto 12px;
+    border-radius: 2px;
+  }
+
+  .section-title p {
+    font-size: 14px;
+    color: var(--c-muted);
+  }
+
+  /* ── About / Intro ── */
+  .intro-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+
+  .intro-img {
+    width: 100%;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+    aspect-ratio: 4/3;
+    object-fit: cover;
+  }
+
+  .intro-text h3 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #3C1F0E;
+  }
+
+  .intro-text p {
+    font-size: 15px;
+    color: var(--c-muted);
+    margin-bottom: 16px;
+    line-height: 1.9;
+  }
+
+  .features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  .feature-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background: #FFF8F3;
+    border-radius: var(--radius);
+    border: 1px solid #F5C4B3;
+  }
+
+  .feature-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--c-primary);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .feature-item span {
+    font-size: 13px;
+    font-weight: 500;
+    color: #5C2A12;
+  }
+
+  /* ── Carousel ── */
+  .carousel-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+  }
+
+  .carousel-track {
+    display: flex;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .carousel-slide {
+    min-width: 100%;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    display: block;
+  }
+
+  .carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: var(--c-text);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    z-index: 2;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .carousel-btn:hover { background: #fff; box-shadow: 0 6px 20px rgba(0,0,0,0.18); }
+  .carousel-btn.prev { left: 16px; }
+  .carousel-btn.next { right: 16px; }
+
+  .carousel-dots {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 2;
+  }
+
+  .carousel-dots button {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    padding: 0;
+  }
+
+  .carousel-dots button.active {
+    background: #fff;
+    width: 28px;
+    border-radius: 5px;
+  }
+
+  /* ── Map ── */
+  .map-wrapper {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    aspect-ratio: 16/7;
+    position: relative;
+    animation: map-glow 3s ease-in-out infinite;
+  }
+
+  @keyframes map-glow {
+    0%, 100% { box-shadow: 0 8px 30px rgba(255,107,53,0.12); }
+    50% { box-shadow: 0 12px 45px rgba(255,107,53,0.25); }
+  }
+
+  .map-wrapper iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  /* Animated marker overlay */
+  .map-marker-layer {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .map-pin-group {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .map-pin-label {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    margin-bottom: 4px;
+    box-shadow: 0 4px 15px rgba(231,76,60,0.4);
+    animation: label-float 2s ease-in-out infinite;
+  }
+
+  @keyframes label-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+
+  .map-pin {
+    width: 48px;
+    height: 48px;
+    position: relative;
+  }
+
+  .map-pin .pin-body {
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    border-radius: 50% 50% 50% 0;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) rotate(-45deg);
+    box-shadow: 0 4px 20px rgba(231,76,60,0.6);
+    animation: pin-bounce 1.5s ease-in-out infinite;
+  }
+
+  .map-pin .pin-body::after {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background: #fff;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  @keyframes pin-bounce {
+    0%, 100% { top: 0; }
+    50% { top: -8px; }
+  }
+
+  .map-pulse-ring {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 3px solid rgba(231,76,60,0.7);
+    animation: pulse-expand 2s ease-out infinite;
+  }
+
+  .map-pulse-ring:nth-child(2) {
+    animation-delay: 0.7s;
+  }
+
+  .map-pulse-ring:nth-child(3) {
+    animation-delay: 1.4s;
+  }
+
+  @keyframes pulse-expand {
+    0% { width: 36px; height: 36px; opacity: 1; transform: translateX(-50%) translateY(0); }
+    100% { width: 130px; height: 130px; opacity: 0; transform: translateX(-50%) translateY(-47px); }
+  }
+
+  .map-info {
+    display: flex;
+    gap: 24px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+
+  .map-card {
+    flex: 1;
+    min-width: 200px;
+    background: #fff;
+    padding: 24px;
+    border-radius: var(--radius);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+
+  .map-card .label {
+    font-size: 12px;
+    color: var(--c-muted);
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+
+  .map-card .value {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--c-text);
+  }
+
+  /* ── Food Gallery ── */
+  .food-carousel-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+  }
+
+  .food-carousel-track {
+    display: flex;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .food-slide {
+    min-width: 100%;
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 24px;
+    align-items: center;
+    background: #fff;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+
+  .food-slide-img {
+    width: 100%;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    display: block;
+  }
+
+  .food-slide-info {
+    padding: 24px 32px 24px 0;
+  }
+
+  .food-slide-info .tag {
+    display: inline-block;
+    background: var(--c-primary-light);
+    color: var(--c-primary);
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+
+  .food-slide-info h3 {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #3C1F0E;
+  }
+
+  .food-slide-info .price {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--c-primary);
+    margin-bottom: 12px;
+  }
+
+  .food-slide-info p {
+    font-size: 14px;
+    color: var(--c-muted);
+    line-height: 1.7;
+  }
+
+  .food-nav-btns {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .food-nav-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid #e0d8d2;
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--c-text);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .food-nav-btn:hover {
+    background: var(--c-primary);
+    color: #fff;
+    border-color: var(--c-primary);
+  }
+
+  .food-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .food-dots button {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #d0c8c0;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.3s;
+  }
+
+  .food-dots button.active {
+    background: var(--c-primary);
+    width: 24px;
+    border-radius: 4px;
+  }
+
+  /* ── Contact & Partners ── */
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+
+  .contact-card {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    padding: 40px 32px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+
+  .contact-card h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: #3C1F0E;
+  }
+
+  .contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .contact-item .icon {
+    width: 36px;
+    height: 36px;
+    background: #FFF8F3;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .contact-item .info .lbl {
+    font-size: 12px;
+    color: var(--c-muted);
+    margin-bottom: 2px;
+  }
+
+  .contact-item .info .val {
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .partner-logos {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .partner-logo {
+    aspect-ratio: 2/1;
+    background: #F8F5F2;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--c-muted);
+    border: 1px solid #e8e4e0;
+    transition: all 0.2s;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .partner-logo:hover {
+    border-color: var(--c-primary);
+    color: var(--c-primary);
+  }
+
+  /* ── Footer ── */
+  .footer {
+    background: #2C1A0E;
+    color: rgba(255,255,255,0.6);
+    text-align: center;
+    padding: 32px;
+    font-size: 13px;
+  }
+
+  .footer strong {
+    color: #FAC775;
+    font-weight: 500;
+  }
+
+  /* ── 响应式 ── */
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 36px; letter-spacing: 2px; }
+    .hero h1 span { font-size: 16px; letter-spacing: 3px; }
+    .hero { min-height: 500px; height: auto; padding: 100px 0 80px; }
+
+    .section { padding: 60px 20px; }
+    .section-title h2 { font-size: 26px; }
+
+    .intro-grid { grid-template-columns: 1fr; gap: 32px; }
+    .features { grid-template-columns: 1fr; }
+
+    .food-slide { grid-template-columns: 1fr; }
+    .food-slide-info { padding: 0 20px 24px; }
+
+    .contact-grid { grid-template-columns: 1fr; }
+    .partner-logos { grid-template-columns: repeat(2, 1fr); }
+    .map-info { flex-direction: column; }
+
+    .carousel-btn { width: 36px; height: 36px; font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ Top Nav ═══ -->
+<nav class="top-nav" id="topNav">
+  <a href="#" class="nav-brand">🍛 咕噜<span>咖喱饭</span></a>
+  <div class="nav-actions">
+    <button class="nav-btn login-btn" onclick="openModal('login')">登录</button>
+    <button class="nav-btn register-btn" onclick="openModal('register')">注册</button>
+  </div>
+</nav>
+
+<!-- ═══ Hero ═══ -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-tag">since 2021 &middot; 手作咖喱专门店</div>
+    <h1>咕噜咖喱饭<span>Gulu Curry Rice</span></h1>
+    <p>日式手作咖喱，慢火熬制 8 小时。每一口都是浓郁的幸福，人均仅 ¥30+，免费续饭续咖喱，吃好吃饱。</p>
+    <a href="#map" class="hero-btn">📍 查看门店位置</a>
+  </div>
+</section>
+
+<!-- ═══ About / 介绍 ═══ -->
+<section class="section" id="about">
+  <div class="section-title">
+    <h2>关于咕噜咖喱</h2>
+    <div class="line"></div>
+    <p>天津排名第一的手作咖喱品牌 · 新店落地任丘</p>
+  </div>
+  <div class="intro-grid">
+    <img class="intro-img" src="images/日式手作咖喱猪排饭_金黄色的现炸猪排覆盖在白色米饭上_淋上深_2026-06-12T07-38-14.png" alt="咕噜咖喱经典手作咖喱猪排饭" loading="lazy">
+    <div class="intro-text">
+      <h3>慢火熬制 · 匠心手作</h3>
+      <p>咕噜咖喱饭创立于2021年，是一家专注于日式手作咖喱的专门店。每一锅咖喱均采用20+种香料，经过8小时慢火熬制，口感浓郁醇厚，回味悠长。</p>
+      <p>从天津火到任丘，我们始终坚持"现做现卖、免费续加"的服务理念，让每一位客人都能吃到热乎、吃饱吃好。</p>
+      <div class="features">
+        <div class="feature-item">
+          <div class="feature-icon">🍛</div>
+          <span>日式手作咖喱</span>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🆓</div>
+          <span>免费续饭续咖喱</span>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">💰</div>
+          <span>人均仅 ¥30+</span>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🥩</div>
+          <span>现炸猪排 · 酥脆多汁</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Store Environment 3-image carousel ═══ -->
+<section class="section" id="environment">
+  <div class="section-title">
+    <h2>店内环境</h2>
+    <div class="line"></div>
+    <p>日式简约风格 · 温馨舒适 · 一人食或小聚皆宜</p>
+  </div>
+  <div class="carousel-container" id="env-carousel">
+    <div class="carousel-track" id="env-track">
+      <img class="carousel-slide" src="images/日式手作咖喱专门店店内环境_温暖的木质装修风格_暖黄色灯光__2026-06-12T07-38-42.png" alt="咕噜咖喱店内环境" loading="lazy">
+      <img class="carousel-slide" src="images/日式咖喱店店内环境_简约日系风格装修_原木色吧台和餐桌_暖色_2026-06-12T07-39-09.png" alt="咕噜咖喱吧台区域" loading="lazy">
+      <img class="carousel-slide" src="images/日式咖喱专门店用餐环境_靠窗的座位_暖阳透过窗户照在木质餐桌_2026-06-12T07-39-35.png" alt="咕噜咖喱窗边用餐区" loading="lazy">
+    </div>
+    <button class="carousel-btn prev" onclick="moveCarousel('env', -1)">◂</button>
+    <button class="carousel-btn next" onclick="moveCarousel('env', 1)">▸</button>
+    <div class="carousel-dots" id="env-dots"></div>
+  </div>
+</section>
+
+<!-- ═══ Map ═══ -->
+<section class="section" id="map">
+  <div class="section-title">
+    <h2>门店位置</h2>
+    <div class="line"></div>
+    <p>河北省任丘市油建二公司对面 · 交通便利 · 停车方便</p>
+  </div>
+  <div class="map-wrapper">
+    <iframe src="https://uri.amap.com/marker?position=116.1043,38.7115&name=咕噜咖喱饭(任丘店)&callnative=1&zoom=16" allow="geolocation" title="门店地图"></iframe>
+    <div class="map-marker-layer">
+      <div class="map-pin-group">
+        <div class="map-pin-label">📍 我们在这里</div>
+        <div class="map-pin">
+          <div class="pulse-ring map-pulse-ring"></div>
+          <div class="pulse-ring map-pulse-ring"></div>
+          <div class="pulse-ring map-pulse-ring"></div>
+          <div class="pin-body"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="map-info">
+    <div class="map-card">
+      <div class="label">门店地址</div>
+      <div class="value">河北省沧州市任丘市油建二公司对面</div>
+    </div>
+    <div class="map-card">
+      <div class="label">营业时间</div>
+      <div class="value">每日 11:00 — 21:00</div>
+    </div>
+    <div class="map-card">
+      <div class="label">联系电话</div>
+      <div class="value">☎ 18232897516</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Food Gallery 10-image carousel with dish info ═══ -->
+<section class="section" id="menu">
+  <div class="section-title">
+    <h2>招牌美食</h2>
+    <div class="line"></div>
+    <p>手作咖喱 · 现炸猪排 · 每日新鲜</p>
+  </div>
+  <div class="food-carousel-container" id="food-carousel">
+    <div class="food-carousel-track" id="food-track"></div>
+    <div class="food-nav-btns">
+      <button class="food-nav-btn" onclick="moveFood(-1)">◂</button>
+      <button class="food-nav-btn" onclick="moveFood(1)">▸</button>
+    </div>
+    <div class="food-dots" id="food-dots"></div>
+  </div>
+</section>
+
+<!-- ═══ Contact & Partners ═══ -->
+<section class="section" id="contact">
+  <div class="section-title">
+    <h2>联系我们 &amp; 合作伙伴</h2>
+    <div class="line"></div>
+    <p>欢迎加盟合作 · 商务洽谈</p>
+  </div>
+  <div class="contact-grid">
+    <div class="contact-card">
+      <h3>📞 联系方式</h3>
+      <div class="contact-item">
+        <div class="icon">📍</div>
+        <div class="info">
+          <div class="lbl">门店地址</div>
+          <div class="val">河北省沧州市任丘市油建二公司对面</div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="icon">☎</div>
+        <div class="info">
+          <div class="lbl">联系电话</div>
+          <div class="val">18232897516</div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="icon">🕐</div>
+        <div class="info">
+          <div class="lbl">营业时间</div>
+          <div class="val">每日 11:00 — 21:00（节假日不休）</div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="icon">📧</div>
+        <div class="info">
+          <div class="lbl">电子邮箱</div>
+          <div class="val">383885227@qq.com</div>
+        </div>
+      </div>
+    </div>
+    <div class="contact-card">
+      <h3>🤝 合作伙伴</h3>
+      <div class="partner-logos">
+        <div class="partner-logo">美团外卖</div>
+        <div class="partner-logo">淘宝闪购</div>
+        <div class="partner-logo">京东外卖</div>
+        <div class="partner-logo">本地商圈</div>
+      </div>
+      <div style="margin-top:24px;">
+        <div class="contact-item">
+          <div class="icon">🤝</div>
+          <div class="info">
+            <div class="lbl">加盟合作热线</div>
+            <div class="val">400-XXX-XXXX</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Footer ═══ -->
+<footer class="footer">
+  <p>&copy; 2026 <strong>咕噜咖喱饭 Gulu Curry Rice</strong> — 手作咖喱专门店</p>
+  <p style="margin-top:6px;">地址：河北省任丘市油建二公司对面 | 人均 ¥30+ | 免费续饭续咖喱</p>
+</footer>
+
+<!-- ═══ Login Modal ═══ -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('login')">&times;</button>
+    <h3>👋 欢迎回来</h3>
+    <p class="sub">登录你的咕噜咖喱账户</p>
+    <form onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label>手机号 / 邮箱</label>
+        <input type="text" id="login-account" placeholder="请输入手机号或邮箱" required>
+      </div>
+      <div class="form-group">
+        <label>密码</label>
+        <input type="password" id="login-password" placeholder="请输入密码" required>
+      </div>
+      <button type="submit" class="form-submit login-submit">登 录</button>
+    </form>
+    <div class="form-switch">
+      还没有账号？<a onclick="switchModal('login','register')">立即注册</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Register Modal ═══ -->
+<div class="modal-overlay" id="registerModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('register')">&times;</button>
+    <h3>🍛 加入咕噜</h3>
+    <p class="sub">注册即享会员专属优惠</p>
+    <form onsubmit="handleRegister(event)">
+      <div class="form-group">
+        <label>昵称</label>
+        <input type="text" id="reg-nickname" placeholder="怎么称呼你？" required>
+      </div>
+      <div class="form-group">
+        <label>手机号</label>
+        <input type="tel" id="reg-phone" placeholder="请输入手机号" required>
+      </div>
+      <div class="form-group">
+        <label>设置密码</label>
+        <input type="password" id="reg-password" placeholder="至少6位密码" required minlength="6">
+      </div>
+      <div class="form-group">
+        <label>确认密码</label>
+        <input type="password" id="reg-password2" placeholder="再次输入密码" required minlength="6">
+      </div>
+      <button type="submit" class="form-submit register-submit">注 册</button>
+    </form>
+    <div class="form-switch">
+      已有账号？<a onclick="switchModal('register','login')">去登录</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ═══ Nav scroll effect ═══ */
+  window.addEventListener('scroll', () => {
+    document.getElementById('topNav').classList.toggle('scrolled', window.scrollY > 50);
+  });
+
+  /* ═══ Modal Logic ═══ */
+  function openModal(type) {
+    document.getElementById(type === 'login' ? 'loginModal' : 'registerModal').classList.add('active');
+  }
+
+  function closeModal(type) {
+    document.getElementById(type === 'login' ? 'loginModal' : 'registerModal').classList.remove('active');
+  }
+
+  function switchModal(from, to) {
+    closeModal(from);
+    setTimeout(() => openModal(to), 200);
+  }
+
+  // Click overlay to close
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', function(e) {
+      if (e.target === this) this.classList.remove('active');
+    });
+  });
+
+  // ESC to close
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+    }
+  });
+
+  function handleLogin(e) {
+    e.preventDefault();
+    const account = document.getElementById('login-account').value;
+    alert('登录成功！欢迎回来，' + account + '  🎉\n（后端接口对接后将实现真实登录）');
+    closeModal('login');
+  }
+
+  function handleRegister(e) {
+    e.preventDefault();
+    const pw = document.getElementById('reg-password').value;
+    const pw2 = document.getElementById('reg-password2').value;
+    if (pw !== pw2) {
+      alert('两次密码输入不一致，请重新输入。');
+      return;
+    }
+    const nickname = document.getElementById('reg-nickname').value;
+    alert('注册成功！欢迎加入咕噜咖喱，' + nickname + '  🍛\n（后端接口对接后将实现真实注册）');
+    closeModal('register');
+  }
+
+  /* ═══ Environment Carousel ═══ */
+  const envCarousels = {
+    env: { track: 'env-track', dots: 'env-dots', current: 0, total: 3 },
+    food: { track: 'food-track', dots: 'food-dots', current: 0, total: 10 }
+  };
+
+  function moveCarousel(name, dir) {
+    const c = envCarousels[name];
+    c.current = (c.current + dir + c.total) % c.total;
+    document.getElementById(c.track).style.transform = `translateX(-${c.current * 100}%)`;
+    updateDots(name);
+  }
+
+  function updateDots(name) {
+    const c = envCarousels[name];
+    const container = document.getElementById(c.dots);
+    container.innerHTML = '';
+    for (let i = 0; i < c.total; i++) {
+      const btn = document.createElement('button');
+      if (i === c.current) btn.className = 'active';
+      btn.onclick = () => { c.current = i; jumpCarousel(name); };
+      container.appendChild(btn);
+    }
+  }
+
+  function jumpCarousel(name) {
+    const c = envCarousels[name];
+    document.getElementById(c.track).style.transform = `translateX(-${c.current * 100}%)`;
+    updateDots(name);
+  }
+
+  updateDots('env');
+  setInterval(() => moveCarousel('env', 1), 5000);
+
+  /* ═══ Food Gallery ═══ */
+  const dishes = [
+    { img: 'images/日式手作咖喱猪排饭_金黄色的现炸猪排覆盖在白色米饭上_淋上深_2026-06-12T07-38-14.png', tag: '招牌必点', name: '经典手作咖喱猪排饭', price: '¥38', desc: '现炸黄金猪排，外酥里嫩，搭配8小时慢熬咖喱酱，每一口都是满足。' },
+    { img: 'images/日式石锅咖喱牛肉饭_滚烫的黑色石锅里盛着白米饭_上面铺满大块_2026-06-12T07-40-29.png', tag: '人气爆款', name: '石锅土豆泥咖喱牛肉', price: '¥42', desc: '石锅现做，土豆泥绵密顺滑，牛肉软烂入味，拌饭一绝。' },
+    { img: 'images/日式咖喱海鲜乌冬面_白色陶瓷碗中盛着粗乌冬面_浸泡在金黄色咖_2026-06-12T07-40-46.png', tag: '海鲜推荐', name: '咖喱海鲜乌冬面', price: '¥35', desc: '劲道乌冬面吸满咖喱酱汁，搭配鲜虾鱿鱼，浓郁鲜香。' },
+    { img: 'images/日式咖喱蛋包饭_金黄色的蛋皮包裹着米饭_淋上香浓的咖喱酱汁__2026-06-12T07-40-02.png', tag: '轻食首选', name: '日式咖喱蛋包饭', price: '¥28', desc: '滑嫩蛋皮包裹米饭，淋上香浓咖喱，一口滑进心里。' },
+    { img: 'images/日式酥炸黄金鸡排咖喱饭_金黄色的炸鸡排切成长条摆在白米饭上__2026-06-12T07-41-12.png', tag: '炸物推荐', name: '酥炸黄金鸡排咖喱饭', price: '¥32', desc: '鸡排炸至金黄，肉质鲜嫩多汁，蘸上咖喱酱绝配。' },
+    { img: 'images/日式铁板咖喱牛排饭_滚烫的黑色铁板上摆放着一块烤至七分熟的牛_2026-06-12T07-41-39.png', tag: '牛排系列', name: '铁板咖喱牛排饭', price: '¥48', desc: '铁板煎制牛排，七分熟刚刚好，搭配特调咖喱风味独特。' },
+    { img: 'images/日式唐扬炸鸡块_竹编篮子里装着金黄色的日式炸鸡块_外皮酥脆__2026-06-12T07-41-55.png', tag: '小食推荐', name: '唐扬炸鸡块', price: '¥18', desc: '日式炸鸡外脆里嫩，鲜嫩多汁，一口一个停不下来。' },
+    { img: 'images/日式酥炸咖喱鱼丸_白色小瓷碗中装着几颗金黄色酥脆的炸鱼丸_旁_2026-06-12T07-42-21.png', tag: '人气小吃', name: '酥炸咖喱鱼丸', price: '¥15', desc: 'Q弹鱼丸裹上面衣炸至酥脆，搭配咖喱蘸酱风味绝佳。' },
+    { img: 'images/日式抹茶红豆大福甜点_白色瓷盘上摆放着两个圆润的抹茶色大福__2026-06-12T07-42-47.png', tag: '甜品推荐', name: '抹茶红豆大福', price: '¥12', desc: '软糯Q弹的日式大福，抹茶清香搭配红豆甜蜜，完美收尾。' },
+    { img: 'images/日式抹茶拿铁饮品_透明玻璃杯中盛着层次分明的抹茶拿铁_底部是_2026-06-12T07-43-13.png', tag: '饮品推荐', name: '日式抹茶拿铁', price: '¥16', desc: '精选宇治抹茶，手打细腻，搭配鲜奶醇香顺滑。' }
+  ];
+
+  const foodTrack = document.getElementById('food-track');
+  dishes.forEach(d => {
+    const slide = document.createElement('div');
+    slide.className = 'food-slide';
+    slide.innerHTML = `
+      <img class="food-slide-img" src="${d.img}" alt="${d.name}" loading="lazy">
+      <div class="food-slide-info">
+        <div class="tag">${d.tag}</div>
+        <h3>${d.name}</h3>
+        <div class="price">${d.price}</div>
+        <p>${d.desc}</p>
+      </div>
+    `;
+    foodTrack.appendChild(slide);
+  });
+
+  function moveFood(dir) {
+    envCarousels.food.current = (envCarousels.food.current + dir + envCarousels.food.total) % envCarousels.food.total;
+    foodTrack.style.transform = `translateX(-${envCarousels.food.current * 100}%)`;
+    updateFoodDots();
+  }
+
+  function updateFoodDots() {
+    const container = document.getElementById('food-dots');
+    container.innerHTML = '';
+    for (let i = 0; i < envCarousels.food.total; i++) {
+      const btn = document.createElement('button');
+      if (i === envCarousels.food.current) btn.className = 'active';
+      btn.onclick = () => { envCarousels.food.current = i; foodTrack.style.transform = `translateX(-${i * 100}%)`; updateFoodDots(); };
+      container.appendChild(btn);
+    }
+  }
+
+  updateFoodDots();
+  setInterval(() => moveFood(1), 5000);
+</script>
+
+</body>
+</html>
